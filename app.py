@@ -219,7 +219,7 @@ class Notpage:
         st.set_page_config(page_title="復習ノート", page_icon="📚")
 
 
-#    @google_oauth2_required
+    @google_oauth2_required
     # サイドバーで行われる処理
     def sidebar(self):
         # ラジオボタンで選択したボタンに対応するメソッドを値として設定

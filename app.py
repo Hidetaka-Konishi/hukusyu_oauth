@@ -5,7 +5,6 @@ from sqlalchemy.orm import sessionmaker
 import streamlit as st
 import time
 from datetime import datetime, timedelta, timezone, date
-from streamlit_google_oauth import google_oauth2_required
 
 # 日本のタイムゾーンを定義
 JST = timezone(timedelta(hours=9))
@@ -47,6 +46,14 @@ class Database(Base):
     # データの更新。append_or_deleteはデータを追加または削除し終えたあとに代入する変数。
     def update(self, append_or_delete):
         query_offset.data = json.dumps(append_or_delete)
+        session.commit()
+
+    def update_schedule(self, date, new_schedule):
+        # 日付に基づいて特定の予定を更新する
+        schedule_entry = session.query(Database).filter(Database.id == 2).first()  # 予定は2行目に保存されている
+        schedule_data = json.loads(schedule_entry.data)
+        schedule_data[date] = new_schedule
+        schedule_entry.data = json.dumps(schedule_data)
         session.commit()
 
 Base.metadata.create_all(engine)
@@ -96,30 +103,39 @@ class Page:
 
             if submit_bt:
                 if schedule:
-                    query_0 = db_instance.query(0)
-                    for add_remove in query_0:
-                        # 「予定を追加する日付」で選択した日付に「復習の間隔(日)」で入力した数字を足している。「calender」という同じ変数を使っていることに
-                        #よって前回の復習日からの復習の間隔を設定することを実現している
-                        calender = calender + timedelta(days=add_remove)
-                        calender_str = str(calender)
-                        query_1 = db_instance.query(1)
-                        if calender_str in query_1:
-                            # キーが既に存在する場合は、値をリストに追加
-                            query_1[calender_str].append(schedule)
-                        else:
-                            # キーが存在しない場合は、新しいリストを作成して値を格納
-                            query_1[calender_str] = [schedule]
-                        db_instance.update(query_1)
-                    success_add = st.success("追加しました")
-                    # 成功メッセージを3秒間表示
-                    time.sleep(3)
-                    # st.success()のメッセージが削除される
-                    success_add.empty()
+                    # 復習の間隔(日)を「＋」から設定しているとき
+                    if query_0:
+                        query_0 = db_instance.query(0)
+                        for add_remove in query_0:
+                            # 「予定を追加する日付」で選択した日付に「復習の間隔(日)」で入力した数字を足している。「calender」という同じ変数を使っていることに
+                            #よって前回の復習日からの復習の間隔を設定することを実現している
+                            calender = calender + timedelta(days=add_remove)
+                            calender_str = str(calender)
+                            query_1 = db_instance.query(1)
+                            if calender_str in query_1:
+                                # キーが既に存在する場合は、値をリストに追加
+                                query_1[calender_str].append(schedule)
+                            else:
+                                # キーが存在しない場合は、新しいリストを作成して値を格納
+                                query_1[calender_str] = [schedule]
+                            db_instance.update(query_1)
+                        success_add = st.success("追加しました")
+                        # 成功メッセージを3秒間表示
+                        time.sleep(3)
+                        # st.success()のメッセージが削除される
+                        success_add.empty()
+                    # 復習の間隔(日)を「＋」から設定していないとき
+                    else:
+                        war_schedule = st.warning("復習の間隔(日)を上記の「＋」から設定してください")
+                        # 失敗メッセージを5秒間表示
+                        time.sleep(5)
+                        # st.warning()のメッセージが削除される
+                        war_schedule.empty()                        
                 # 「予定」の欄が空の場合
                 else:
                     war_schedule = st.warning("「予定」の欄を記入してください")
-                    # 失敗メッセージを3秒間表示
-                    time.sleep(3)
+                    # 失敗メッセージを5秒間表示
+                    time.sleep(5)
                     # st.warning()のメッセージが削除される
                     war_schedule.empty()
 
@@ -127,24 +143,6 @@ class Page:
     # 予定の削除
     def schdule_del(self):
         st.header("予定の削除")
-        with st.form("delete_date"):
-            calender_delete = st.date_input("削除する日付", date(year, month, day))
-            calender_delete_str = str(calender_delete)
-
-            delete_date = st.form_submit_button("予定を削除")
-
-            if delete_date:
-                query_1 = db_instance.query(1)
-                if calender_delete_str in query_1:
-                    del query_1[calender_delete_str]
-                    db_instance.update(query_1)
-                    success_delete = st.success("削除しました")
-                    time.sleep(3)
-                    success_delete.empty()
-                else:
-                    success_delete = st.success("削除しました")
-                    time.sleep(3)
-                    success_delete.empty()
 
         with st.form("delete_multi"):
             calender_delete = st.date_input("選択した日付以降の予定をすべて削除", date(year, month, day))
@@ -189,23 +187,46 @@ class Page:
                     # st.success()のメッセージが削除される
                     success_delete.empty()      
 
-
     # セッション状態に保存されたデータを表示する
     def ca(self):
         st.header("カレンダー")
 
         query_1 = db_instance.query(1)
-        # Streamlitを実行した段階ではsession_stateにshared_dataキーが設定されていないのでFalseになる。
         if query_1:
-            # shared_dataキーの値である辞書をタプル型に変換
             tuple_query_1 = query_1.items()
-            # shared_dataキーの値である辞書の中のデータを昇順に並び替え
             query_1_up = sorted(tuple_query_1)
-            # 日付と「予定」の欄で入力された文字をそれぞれ取得
-            for day_one, shedule_one  in query_1_up:
-                shedule_one_plus = ", ".join(shedule_one)
-                # 日付と「予定」の欄で入力された文字をUIで表示
-                st.text_input(f"{day_one}", f"{shedule_one_plus}")
+            for day_one, schedule_one in query_1_up:
+                schedule_one_plus = ", ".join(schedule_one)
+                # 編集されたスケジュールを取得
+                edited_schedule = st.text_input(f"{day_one}", f"{schedule_one_plus}")
+                # 「保存」ボタンを追加
+                if st.button(f"予定を更新 {day_one}"):
+                    # スペースで分割してリストに変換
+                    new_schedule_list = edited_schedule.split(", ")
+                    # データベースを更新
+                    db_instance.update_schedule(day_one, new_schedule_list)
+                    success_delete = st.success(f"{day_one} の予定を更新しました。")
+                    # 成功メッセージを3秒間表示
+                    time.sleep(3)
+                    # st.success()のメッセージが削除される
+                    success_delete.empty()      
+                if st.button(f"予定を削除 {day_one}"):
+                    st.session_state["deleted"] = True  # セッション状態にフラグを設定
+                    day_one_str = str(day_one)
+                    query_1 = db_instance.query(1)
+                    if day_one_str in query_1:
+                        del query_1[day_one_str]
+                        db_instance.update(query_1)
+                        success_delete = st.success("削除しました")
+                        # 成功メッセージを3秒間表示
+                        time.sleep(3)
+                        # st.success()のメッセージが削除される
+                        success_delete.empty()      
+
+        # もし削除ボタンが押されたら、ページを再読み込み
+        if "deleted" in st.session_state and st.session_state["deleted"]:
+            st.session_state["deleted"] = False  # フラグをリセット
+            st.experimental_rerun()
 
 
 page_multi = Page()
@@ -219,7 +240,6 @@ class Notpage:
         st.set_page_config(page_title="復習ノート", page_icon="📚")
 
 
-    @google_oauth2_required
     # サイドバーで行われる処理
     def sidebar(self):
         # ラジオボタンで選択したボタンに対応するメソッドを値として設定
@@ -229,15 +249,12 @@ class Notpage:
             "カレンダー": page_multi.ca
         }
         # サイドバー上に「予定を入力」と「カレンダー」を選択できるラジオボタンを配置
-        selected_page = st.sidebar.radio("Select a page", list(pages.keys()))
+        selected_page = st.sidebar.radio("【ページの選択】", list(pages.keys()))
         # pages辞書のキー(ラジオボタンで選択したキー)に対応する値をメソッドとして実行
         pages[selected_page]()
 
-        
-not_page = Notpage()
-
-
-# UIの設定
-not_page.set_ui()
-# サイドバーで行われる処理
-not_page.sidebar()
+# クラスとメソッドの定義の後に、以下の行を追加
+if __name__ == "__main__":
+    not_page = Notpage()
+    not_page.set_ui()
+    not_page.sidebar()

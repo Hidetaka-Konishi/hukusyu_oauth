@@ -49,12 +49,9 @@ class Database(Base):
         session.commit()
 
     def update_schedule(self, date, new_schedule):
-        # 日付に基づいて特定の予定を更新する
-        schedule_entry = session.query(Database).filter(Database.id == 2).first()  # 予定は2行目に保存されている
-        schedule_data = json.loads(schedule_entry.data)
-        schedule_data[date] = new_schedule
-        schedule_entry.data = json.dumps(schedule_data)
-        session.commit()
+        query_1 = db_instance.query(1)
+        query_1[date] = new_schedule
+        db_instance.update(query_1)
 
 Base.metadata.create_all(engine)
 

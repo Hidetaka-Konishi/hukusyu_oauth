@@ -184,19 +184,20 @@ class Page:
                     # st.success()のメッセージが削除される
                     success_delete.empty()      
 
-    # セッション状態に保存されたデータを表示する
+    # 日付と予定のペアを表示する
     def ca(self):
         st.header("カレンダー")
 
         query_1 = db_instance.query(1)
         if query_1:
             tuple_query_1 = query_1.items()
+            # カレンダーのページの上から順に日付が表示されるように昇順に並び替え
             query_1_up = sorted(tuple_query_1)
             for day_one, schedule_one in query_1_up:
+                # schedule_oneというリストの中の要素を結合することで[]をはずす
                 schedule_one_plus = ", ".join(schedule_one)
-                # 編集されたスケジュールを取得
+                # 編集された予定を取得
                 edited_schedule = st.text_input(f"{day_one}", f"{schedule_one_plus}")
-                # 「保存」ボタンを追加
                 if st.button(f"予定を更新 {day_one}"):
                     # スペースで分割してリストに変換
                     new_schedule_list = edited_schedule.split(", ")
@@ -241,9 +242,9 @@ class Notpage:
     def sidebar(self):
         # ラジオボタンで選択したボタンに対応するメソッドを値として設定
         pages = {
+            "カレンダー": page_multi.ca,
             "予定の追加": page_multi.schdule_append,
-            "予定の削除": page_multi.schdule_del,
-            "カレンダー": page_multi.ca
+            "予定の削除": page_multi.schdule_del
         }
         # サイドバー上に「予定を入力」と「カレンダー」を選択できるラジオボタンを配置
         selected_page = st.sidebar.radio("【ページの選択】", list(pages.keys()))

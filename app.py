@@ -194,12 +194,13 @@ class Page:
             # カレンダーのページの上から順に日付が表示されるように昇順に並び替え
             query_1_up = sorted(tuple_query_1)
             for day_one, schedule_one in query_1_up:
-                # schedule_oneというリストの中の要素を結合することで[]をはずす
+                # schedule_oneというリストの中の要素を , (コンマと半角スペース)の部分で結合することで[]がはずれる 
                 schedule_one_plus = ", ".join(schedule_one)
                 # 編集された予定を取得
                 edited_schedule = st.text_input(f"{day_one}", f"{schedule_one_plus}")
                 if st.button(f"予定を更新 {day_one}"):
-                    # スペースで分割してリストに変換
+                    # データベーステーブルから取得したデータを上記の ", ".join(schedule_one) によってリストをはずす処理を行うので、このコードでは
+                    #データベーステーブルに保存する前にリスト型にしている。
                     new_schedule_list = edited_schedule.split(", ")
                     # データベースを更新
                     db_instance.update_schedule(day_one, new_schedule_list)

@@ -100,9 +100,7 @@ class Page:
                 # データベーステーブルを更新
                 db_instance.update(query_0)
 
-            submit_bt = st.form_submit_button("予定を追加")
-
-            if submit_bt:
+            if st.form_submit_button("予定を追加"):
                 if schedule:
                     # 復習の間隔(日)を「＋」から設定しているとき
                     if query_0:
@@ -150,9 +148,8 @@ class Page:
 
         with st.form("delete_multi"):
             calender_delete = st.date_input("選択した日付以降の予定をすべて削除", date(year, month, day))
-            delete_date = st.form_submit_button("予定を削除")
 
-            if delete_date:
+            if st.form_submit_button("予定を削除"):
                 # データベーステーブルからデータを取得
                 query_1 = db_instance.query(1)
                 # 削除対象の日付リストを生成
@@ -170,9 +167,7 @@ class Page:
                 success_delete.empty()
 
         with st.form("delete_all"):
-            delete_date = st.form_submit_button("予定をすべて削除")
-
-            if delete_date:
+            if st.form_submit_button("予定をすべて削除"):
                 # "shared_data"には予定を追加する日付と予定の情報が格納されているが、これらの情報が格納されていない状態で「予定を削除」ボタン
                 #が押されたときにエラーになってしまうので、それを防ぐためにtry-except文を使用する
                 try:
@@ -212,7 +207,6 @@ class Page:
                     # データベーステーブルから取得したデータを上記の ", ".join(schedule_one) によってリストをはずす処理を行うので、このコードでは
                     #データベーステーブルに保存する前にリスト型にしている。
                     new_schedule_list = edited_schedule.split(", ")
-                    print(new_schedule_list)
                     # データベーステーブルからデータを取得
                     query_1 = db_instance.query(1)
                     # 編集したあとの予定を日付に紐づける
@@ -264,8 +258,8 @@ class Notpage:
         # pages辞書のキー(ラジオボタンで選択したキー)に対応する値をメソッドとして実行
         pages[selected_page]()
 
+not_page = Notpage()
 
 if __name__ == "__main__":
-    not_page = Notpage()
     not_page.set_ui()
     not_page.sidebar()

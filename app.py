@@ -225,10 +225,6 @@ class Page:
                     # st.success()のメッセージが削除される
                     success_update.empty()      
                 if st.button(f"予定を削除 {day_one}"):
-                    # session_stateを安全に使うためのおまじない
-                    if "deleted" not in st.session_state:
-                        st.session_state.deleted = ""
-                    st.session_state.deleted = True  # セッション状態にフラグを設定
                     day_one_str = str(day_one)
                     # データベーステーブルからデータを取得
                     query_1 = db_instance.query(1)
@@ -240,12 +236,9 @@ class Page:
                         # 成功メッセージを3秒間表示
                         time.sleep(3)
                         # st.success()のメッセージが削除される
-                        success_delete.empty()      
-
-        # もし削除ボタンが押されたら、ページを再読み込み
-        if "deleted" in st.session_state and st.session_state.deleted:
-            st.session_state.deleted = False  # フラグをリセット
-            st.rerun()
+                        success_delete.empty()
+                    # Webアプリを再読み込みする
+                    st.rerun()                    
 
 page_multi = Page()
 
@@ -271,7 +264,7 @@ class Notpage:
         # pages辞書のキー(ラジオボタンで選択したキー)に対応する値をメソッドとして実行
         pages[selected_page]()
 
-# クラスとメソッドの定義の後に、以下の行を追加
+
 if __name__ == "__main__":
     not_page = Notpage()
     not_page.set_ui()

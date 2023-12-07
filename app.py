@@ -69,9 +69,11 @@ class Page:
 
             st.write("復習の間隔(日)を以下の「＋」から設定してください")
 
-            #「＋」のボタンよりも数字を入力する欄のほうがUI上の画面の上に表示されるようにするために「st_input_area」→「st_add_button_area」という
-            #順番にしている
+            # 復習日間隔の日数入力欄の表示エリア
             st_input_area = st.container()
+            # 成功メッセージと失敗メッセージ用の表示エリア
+            st_message_area = st.container()
+            # 「＋」と「ー」用の表示エリア
             st_add_button_area = st.container()
 
             #数字を入力する欄を追加
@@ -81,6 +83,7 @@ class Page:
                 query_0.append("")
                 # データベーステーブルを更新
                 db_instance.update(query_0)
+
             #数字を入力する欄を一つ削除
             if st_add_button_area.form_submit_button("ー"):
                 # データベーステーブルからデータを取得
@@ -89,12 +92,10 @@ class Page:
                     del query_0[-1]
                     # データベーステーブルを更新
                     db_instance.update(query_0)
-            
+
             # データベーステーブルからデータを取得
             query_0 = db_instance.query(0)
             for i in range(len(query_0)):
-                # データベーステーブルからデータを取得
-                query_0 = db_instance.query(0)
                 # listキーの値であるリストに格納された""をnumber_inputウイジェットで選択した数字に置き換える
                 query_0[i] = st_input_area.number_input(f"{i}回目の復習日からの間隔", 0)
                 # データベーステーブルを更新
@@ -121,27 +122,27 @@ class Page:
                                 query_1[calender_str] = [schedule]
                             # データベーステーブルを更新
                             db_instance.update(query_1)
-                        success_add = st.success("追加しました")
-                        # 成功メッセージを3秒間表示
+                        
+                        # 成功メッセージの表示位置を変更
+                        message_placeholder = st_message_area.empty()
+                        message_placeholder.success("追加しました")
                         time.sleep(3)
-                        # st.success()のメッセージが削除される
-                        success_add.empty()
-                    # 復習の間隔(日)を「＋」から設定していないとき
+                        message_placeholder.empty()
                     else:
                         war_schedule = st.warning("復習の間隔(日)を上記の「＋」から設定してください")
                         # 失敗メッセージを5秒間表示
                         time.sleep(5)
                         # st.warning()のメッセージが削除される
-                        war_schedule.empty()                        
-                # 「予定」の欄が空の場合
+                        war_schedule.empty()
+                # 「予定」の欄が空の場合                  
                 else:
                     war_schedule = st.warning("「予定」の欄を記入してください")
                     # 失敗メッセージを5秒間表示
                     time.sleep(5)
-                    # st.warning()のメッセージが削除される
+                     # st.warning()のメッセージが削除される
                     war_schedule.empty()
 
-                
+
     # 予定の削除
     def schdule_del(self):
         st.header("予定の削除")
@@ -189,6 +190,7 @@ class Page:
                     # st.success()のメッセージが削除される
                     success_delete.empty()      
 
+
     # 日付と予定のペアを表示する
     def ca(self):
         st.header("カレンダー")
@@ -234,11 +236,11 @@ class Page:
                     # Webアプリを再読み込みする
                     st.rerun()                    
 
+
 page_multi = Page()
 
 
 class Notpage:
-
     # UIの設定
     def set_ui(self):
         # UI上の画面上部に表示されるタイトル
@@ -258,7 +260,9 @@ class Notpage:
         # pages辞書のキー(ラジオボタンで選択したキー)に対応する値をメソッドとして実行
         pages[selected_page]()
 
+
 not_page = Notpage()
+
 
 if __name__ == "__main__":
     not_page.set_ui()

@@ -76,6 +76,9 @@ class Page:
             # 「＋」と「ー」用の表示エリア
             st_add_button_area = st.container()
 
+            # 成功メッセージと失敗メッセージ用の表示エリアをさらに上書き可能なエリアにする
+            message_placeholder = st_message_area.empty()
+
             #数字を入力する欄を追加
             if st_add_button_area.form_submit_button("＋"):
                 # データベーステーブルからデータを取得
@@ -123,24 +126,22 @@ class Page:
                             # データベーステーブルを更新
                             db_instance.update(query_1)
                         
-                        # 成功メッセージの表示位置を変更
-                        message_placeholder = st_message_area.empty()
                         message_placeholder.success("追加しました")
                         time.sleep(3)
                         message_placeholder.empty()
                     else:
-                        war_schedule = st.warning("復習の間隔(日)を上記の「＋」から設定してください")
+                        message_placeholder.warning("復習の間隔(日)を上記の「＋」から設定してください")
                         # 失敗メッセージを5秒間表示
                         time.sleep(5)
                         # st.warning()のメッセージが削除される
-                        war_schedule.empty()
+                        message_placeholder.empty()
                 # 「予定」の欄が空の場合                  
                 else:
-                    war_schedule = st.warning("「予定」の欄を記入してください")
+                    message_placeholder.warning("「予定」の欄を記入してください")
                     # 失敗メッセージを5秒間表示
                     time.sleep(5)
                      # st.warning()のメッセージが削除される
-                    war_schedule.empty()
+                    message_placeholder.empty()
 
 
     # 予定の削除

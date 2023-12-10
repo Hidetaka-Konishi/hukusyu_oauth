@@ -48,7 +48,6 @@ class Database(Base):
         query_offset.data = json.dumps(append_or_delete)
         session.commit()
 
-
 Base.metadata.create_all(engine)
 
 db_instance = Database()
@@ -57,6 +56,18 @@ db_instance = Database()
 db_instance.default([])
 # 🌟🌟日付をキー、「予定」の欄で入力された文字を値として保存する辞書。データベーステーブルの2行目に追加。
 db_instance.default({})
+
+
+class Message:
+    # 成功メッセージを表示。send_messageにはダブルクォーテーションで囲んだメッセージが入る。
+    def success(self, send_message):
+        success_message = st.success(send_message)
+        # 成功メッセージを3秒間表示
+        time.sleep(3)
+        # 成功メッセージが削除される
+        success_message.empty()
+
+message = Message()
 
 
 class Page:
@@ -125,9 +136,10 @@ class Page:
                                 query_1[calender_str] = [schedule]
                             # データベーステーブルを更新
                             db_instance.update(query_1)
-                        
                         message_placeholder.success("追加しました")
+                        # 成功メッセージを3秒間表示
                         time.sleep(3)
+                        # 成功メッセージが削除される
                         message_placeholder.empty()
                     else:
                         message_placeholder.warning("復習の間隔(日)を上記の「＋」から設定してください")
@@ -140,7 +152,7 @@ class Page:
                     message_placeholder.warning("「予定」の欄を記入してください")
                     # 失敗メッセージを5秒間表示
                     time.sleep(5)
-                     # st.warning()のメッセージが削除される
+                    # st.warning()のメッセージが削除される
                     message_placeholder.empty()
 
 
@@ -156,40 +168,22 @@ class Page:
                 query_1 = db_instance.query(1)
                 # 削除対象の日付リストを生成
                 to_delete = [date_str for date_str in query_1 if datetime.strptime(date_str, '%Y-%m-%d').date() >= calender_delete]
-
                 # 削除対象の日付を削除
                 for date_delete in to_delete:
                     del query_1[date_delete]
-
                 # データベーステーブルを更新
                 db_instance.update(query_1)
-
-                success_delete = st.success("削除しました")
-                time.sleep(3)
-                success_delete.empty()
+                message.success("削除しました")
 
         with st.form("delete_all"):
             if st.form_submit_button("予定をすべて削除"):
-                # "shared_data"には予定を追加する日付と予定の情報が格納されているが、これらの情報が格納されていない状態で「予定を削除」ボタン
-                #が押されたときにエラーになってしまうので、それを防ぐためにtry-except文を使用する
-                try:
-                    # データベーステーブルからデータを取得
-                    query_1 = db_instance.query(1)
-                    # shared_dataキーと値のペアをすべて削除
-                    query_1.clear()
-                    # データベーステーブルを更新
-                    db_instance.update(query_1)
-                    success_delete = st.success("削除しました")
-                    # 成功メッセージを3秒間表示
-                    time.sleep(3)
-                    # st.success()のメッセージが削除される
-                    success_delete.empty()
-                except:
-                    success_delete = st.success("削除しました")
-                    # 成功メッセージを3秒間表示
-                    time.sleep(3)
-                    # st.success()のメッセージが削除される
-                    success_delete.empty()      
+                # データベーステーブルからデータを取得
+                query_1 = db_instance.query(1)
+                # shared_dataキーと値のペアをすべて削除
+                query_1.clear()
+                # データベーステーブルを更新
+                db_instance.update(query_1)
+                message.success("削除しました")
 
 
     # 日付と予定のペアを表示する
@@ -216,11 +210,7 @@ class Page:
                     query_1[day_one] = new_schedule_list
                     # データベーステーブルを更新
                     db_instance.update(query_1)
-                    success_update = st.success(f"{day_one} の予定を更新しました。")
-                    # 成功メッセージを3秒間表示
-                    time.sleep(3)
-                    # st.success()のメッセージが削除される
-                    success_update.empty()      
+                    message.success(f"{day_one} の予定を更新しました。")
                 if st.button(f"予定を削除 {day_one}"):
                     day_one_str = str(day_one)
                     # データベーステーブルからデータを取得
@@ -229,11 +219,7 @@ class Page:
                         del query_1[day_one_str]
                         # データベーステーブルを更新
                         db_instance.update(query_1)
-                        success_delete = st.success("削除しました")
-                        # 成功メッセージを3秒間表示
-                        time.sleep(3)
-                        # st.success()のメッセージが削除される
-                        success_delete.empty()
+                        message.success("削除しました")
                     # Webアプリを再読み込みする
                     st.rerun()                    
 

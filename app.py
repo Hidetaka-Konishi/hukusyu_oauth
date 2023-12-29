@@ -96,16 +96,17 @@ class Page:
                     # schedule_one_plusの部分だけedited_schedule変数に代入している
                     edited_schedule = st.text_input(f"{day_one}", f"{schedule_one_plus}")
                     if st.button(f"予定を更新 {day_one}"):
-                        # データベーステーブルから取得したデータを上記の ", ".join(schedule_one) によってリストをはずす処理を行うので、このコードでは
-                        #データベーステーブルに保存する前にリスト型にしている。
-                        new_schedule_list = edited_schedule.split(", ")
-                        # データベーステーブルからデータを取得
-                        query_1 = db_instance.query(1)
-                        # 編集したあとの予定を日付に紐づける
-                        query_1[day_one] = new_schedule_list
-                        # データベーステーブルを更新
-                        db_instance.update(query_1)
-                        message.success(f"{day_one} の予定を更新しました。")
+                        with st.spinner('保存中...'):
+                            # データベーステーブルから取得したデータを上記の ", ".join(schedule_one) によってリストをはずす処理を行うので、このコードではデータベーステーブルに保存する前にリスト型にしている。
+                            new_schedule_list = edited_schedule.split(", ")
+                            # データベーステーブルからデータを取得
+                            query_1 = db_instance.query(1)
+                            # 編集したあとの予定を日付に紐づける
+                            query_1[day_one] = new_schedule_list
+                            # データベーステーブルを更新
+                            db_instance.update(query_1)
+                            time.sleep(1)
+                            st.rerun()
                     if st.button(f"予定を削除 {day_one}"):
                         day_one_str = str(day_one)
                         # データベーステーブルからデータを取得
@@ -157,8 +158,7 @@ class Page:
             # データベーステーブルからデータを取得
             query_0 = db_instance.query(0)
             for i in range(len(query_0)):
-                # query_0の中にある""の数だけnumber_inputウイジェットが実行されるので数字を入力する欄の数を調整できる。
-                # そしてquery_0に格納された""をnumber_inputウイジェットで選択した数字に置き換えている
+                # query_0の中にある""の数だけnumber_inputウイジェットが実行されるので数字を入力する欄の数を調整できる。そしてquery_0に格納された""をnumber_inputウイジェットで選択した数字に置き換えている
                 query_0[i] = st_input_area.number_input(f"{i}回目の復習日からの間隔", 0)
                 # データベーステーブルを更新
                 db_instance.update(query_0)
@@ -170,8 +170,7 @@ class Page:
                         # データベーステーブルからデータを取得
                         query_0 = db_instance.query(0)
                         for add_remove in query_0:
-                            # 「予定を追加する日付」で選択した日付に「復習の間隔(日)」で入力した数字を足している。「calender」という同じ変数を使っている
-                            # ことによって前回の復習日からの復習の間隔を設定することを実現している
+                            # 「予定を追加する日付」で選択した日付に「復習の間隔(日)」で入力した数字を足している。「calender」という同じ変数を使っていることによって前回の復習日からの復習の間隔を設定することを実現している
                             calender = calender + timedelta(days=add_remove)
                             calender_str = str(calender)
                             # データベーステーブルからデータを取得
@@ -247,16 +246,17 @@ class Page:
                 # schedule_one_plusの部分だけ変数に代入している
                 edited_schedule = st.text_input(f"{day_one}", f"{schedule_one_plus}")
                 if st.button(f"予定を更新 {day_one}"):
-                    # データベーステーブルから取得したデータを上記の ", ".join(schedule_one) によってリストをはずす処理を行うので、このコードでは
-                    # データベーステーブルに保存する前にリスト型にしている。
-                    new_schedule_list = edited_schedule.split(", ")
-                    # データベーステーブルからデータを取得
-                    query_1 = db_instance.query(1)
-                    # 編集したあとの予定を日付に紐づける
-                    query_1[day_one] = new_schedule_list
-                    # データベーステーブルを更新
-                    db_instance.update(query_1)
-                    message.success(f"{day_one} の予定を更新しました。")
+                    with st.spinner('保存中...'):
+                        # データベーステーブルから取得したデータを上記の ", ".join(schedule_one) によってリストをはずす処理を行うので、このコードではデータベーステーブルに保存する前にリスト型にしている。
+                        new_schedule_list = edited_schedule.split(", ")
+                        # データベーステーブルからデータを取得
+                        query_1 = db_instance.query(1)
+                        # 編集したあとの予定を日付に紐づける
+                        query_1[day_one] = new_schedule_list
+                        # データベーステーブルを更新
+                        db_instance.update(query_1)
+                        time.sleep(1)
+                        st.rerun()
                 if st.button(f"予定を削除 {day_one}"):
                     day_one_str = str(day_one)
                     # データベーステーブルからデータを取得

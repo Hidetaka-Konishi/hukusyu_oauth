@@ -117,7 +117,7 @@ class Page:
                         da.database.update(query_1)
                     me.placeholder.success("追加しました", message_placeholder, 3)
                 except:
-                    me.placeholder.error("まずは左側のサイドバーの「復習する日数間隔のグループ」からグループを作成してください", message_placeholder, 5)
+                    me.placeholder.error("まずは左側のサイドバーの「復習する日数間隔のグループ」からグループを作成してください", message_placeholder, 10)
             # 「予定」の欄が空の場合                  
             else:
                 me.placeholder.error("「予定」の欄を記入してください", message_placeholder, 5)

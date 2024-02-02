@@ -160,31 +160,36 @@ class Login:
         st.title("ユーザー名/パスワード再設定")
         with st.form("re_username_password"):
             new_username = st.text_input("新しいユーザー名", key="new_reset_username")
-            new_password = st.text_input("新しいパスワード", type="password", key="new_reset_password")
+            new_password = st.text_input("新しいパスワード（パスワードにはローマ字の大文字、小文字、数字を必ず含めるようにして14文字以上であること。この条件を満たしていてば記号もパスワードに含めて良い）", type="password", key="new_reset_password")
             if st.form_submit_button("決定"):
                 if new_username and new_password:
                     if " " not in new_username and "　" not in new_username:
                         if " " not in new_password and "　" not in new_password:
                             valid_password, error_message = self.validate_password(new_password)
                             if not valid_password:
-                                me.message.error(error_message, 10)
+                                me.message.error(error_message, 20)
                                 # ここで処理を終了
                                 return
 
-                            # ユーザー名とパスワードの更新＆ログイン後の処理
-                            hashed_new_username = bcrypt.hashpw(new_username.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-                            hashed_new_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
                             query_0 = da.database.query("everybady", 0)
-                            query_0_list = list(query_0.keys())
-                            query_0_list_email = query_0_list[st.session_state["co"]]
-                            query_0[query_0_list_email] = {hashed_new_username:hashed_new_password}
-                            da.database.update(query_0)
-                            me.message.success("ユーザー名とパスワードが再設定されました", 3)
-                            
-                            query_1 = da.database.query("everybady", 1)
-                            st.session_state["generate_key"] = query_1[st.session_state["co"]].encode('utf-8')
-                            st.session_state['page'] = 'reset_and_login'
-                            st.rerun()
+                            # ユーザー名が既に存在するかチェック
+                            if ch_us.check_user.username_check(query_0, new_username):
+                                me.message.error("このユーザー名は既に存在します", 5)
+                            else:
+                                # ユーザー名とパスワードの更新＆ログイン後の処理
+                                hashed_new_username = bcrypt.hashpw(new_username.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+                                hashed_new_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+                                query_0 = da.database.query("everybady", 0)
+                                query_0_list = list(query_0.keys())
+                                query_0_list_email = query_0_list[st.session_state["co"]]
+                                query_0[query_0_list_email] = {hashed_new_username:hashed_new_password}
+                                da.database.update(query_0)
+                                me.message.success("ユーザー名とパスワードが再設定されました", 3)
+                                
+                                query_1 = da.database.query("everybady", 1)
+                                st.session_state["generate_key"] = query_1[st.session_state["co"]].encode('utf-8')
+                                st.session_state['page'] = 'reset_and_login'
+                                st.rerun()
                         else:
                             me.message.error("パスワードに半角スペースまたは全角スペースは使用できません", 5)
                     else:
@@ -210,6 +215,9 @@ class Login:
         if 'signin_button' not in st.session_state:
             st.session_state['signin_button'] = ""
 
+        if 'signin_send_button' not in st.session_state:
+            st.session_state['signin_send_button'] = ""
+
         with st.form("security_code_send"):
             # ユーザー名とパスワードとメールアドレスの入力フィールド（サインイン用）
             new_username = st.text_input("新規ユーザー名", key="new_username")
@@ -223,7 +231,7 @@ class Login:
                             if " " not in new_mail and "　" not in new_mail:
                                 valid_password, error_message = self.validate_password(new_password)
                                 if not valid_password:
-                                    error_message = me.message.error(error_message, 10)
+                                    error_message = me.message.error(error_message, 20)
                                     # ここで処理を終了
                                     return
 
@@ -235,6 +243,7 @@ class Login:
                                 elif ch_us.check_user.email_check(query_0, new_mail):
                                     me.message.error("このメールアドレスは既にサインインされています", 5)
                                 else:
+                                    st.session_state['signin_send_button'] = "click"
                                     # セキュリティコードの生成とメール送信
                                     code = se_co.securitycode.generate_code(new_mail)
                                     mail.mail.mail_send(new_mail, code)  # コードを含むメールを送信
@@ -256,72 +265,63 @@ class Login:
             entered_code = st.text_input("セキュリティコードを入力", key="security_code")
             if st.form_submit_button("決定"):
                 if new_username and new_password and new_mail:
-                    if " " not in new_username and "　" not in new_username:
-                        if " " not in new_password and "　" not in new_password:
-                            if " " not in new_mail and "　" not in new_mail:
-                                # 保存されたメールアドレスを使用して認証
-                                if se_co.securitycode.verify_code(new_mail, entered_code):
-                                    # サインインした後の処理をここに記述
-                                    hashed_new_username = bcrypt.hashpw(new_username.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-                                    hashed_new_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-                                    hashed_new_email = bcrypt.hashpw(new_mail.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+                    if st.session_state['signin_send_button'] == "click":
+                        if " " not in entered_code and "　" not in entered_code:
+                            # 保存されたメールアドレスを使用して認証
+                            if se_co.securitycode.verify_code(new_mail, entered_code):
+                                # サインインした後の処理をここに記述
+                                hashed_new_username = bcrypt.hashpw(new_username.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+                                hashed_new_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+                                hashed_new_email = bcrypt.hashpw(new_mail.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-                                    query_0 = da.database.query("everybady", 0)
-                                    query_0[hashed_new_email] = {hashed_new_username:hashed_new_password}
-                                    da.database.update(query_0)
+                                query_0 = da.database.query("everybady", 0)
+                                query_0[hashed_new_email] = {hashed_new_username:hashed_new_password}
+                                da.database.update(query_0)
 
-                                    st.session_state["generate_key"] = en_de.encrypt_decrypt.generate_key()
-                                    generate_key_decode = st.session_state["generate_key"].decode('utf-8')
-                                    query_1 = da.database.query("everybady", 1)
-                                    query_1.append(generate_key_decode)
-                                    da.database.update(query_1)
-                                    # 復習する日数間隔グループの情報を入れる辞書。{"グループ1":[2,5,8]}といった形式になる。st.session_state["generate_key"]の1行目に追加。
-                                    da.database.default(st.session_state["generate_key"], {})
-                                    # 日付をキー、「予定」の欄で入力された文字を値として保存する辞書。{2024-1-11:[予定1,予定2]}といった形式になる。st.session_state["generate_key"]の2行目に追加。
-                                    da.database.default(st.session_state["generate_key"], {})
-                                    st.session_state['page'] = 'signin_email'
-                                    st.rerun()
-                                else:
-                                    me.placeholder.error("セキュリティコードが誤っている、またはコードが期限切れです", message_area_signin_code_empty, 5)
+                                st.session_state["generate_key"] = en_de.encrypt_decrypt.generate_key()
+                                generate_key_decode = st.session_state["generate_key"].decode('utf-8')
+                                query_1 = da.database.query("everybady", 1)
+                                query_1.append(generate_key_decode)
+                                da.database.update(query_1)
+                                # 復習する日数間隔グループの情報を入れる辞書。{"グループ1":[2,5,8]}といった形式になる。st.session_state["generate_key"]の1行目に追加。
+                                da.database.default(st.session_state["generate_key"], {})
+                                # 日付をキー、「予定」の欄で入力された文字を値として保存する辞書。{2024-1-11:[予定1,予定2]}といった形式になる。st.session_state["generate_key"]の2行目に追加。
+                                da.database.default(st.session_state["generate_key"], {})
+                                st.session_state['page'] = 'signin_email'
+                                st.rerun()
                             else:
-                                me.placeholder.error("メールアドレスに半角スペースまたは全角スペースは使用できません", message_area_signin_code_empty, 5)
+                                me.placeholder.error("セキュリティコードが誤っている、またはコードが期限切れです", message_area_signin_code_empty, 5)
                         else:
-                            me.placeholder.error("パスワードに半角スペースまたは全角スペースは使用できません", message_area_signin_code_empty, 5)
+                            me.placeholder.error("セキュリティコードに半角スペースまたは全角スペースは使用できません", message_area_signin_code_empty, 5)
                     else:
-                        me.placeholder.error("ユーザー名に半角スペースまたは全角スペースは使用できません", message_area_signin_code_empty, 5)
+                        me.placeholder.error("上記の「送信ボタン」を押してください", message_area_signin_code_empty, 5)    
                 else:
                     me.placeholder.error("セキュリティコード以外のすべての項目を埋めてから、上記の「送信」ボタンをクリックしてください", message_area_signin_code_empty, 5)
 
             # コード再送信ボタン
             if st.form_submit_button("セキュリティコードを再送信"):
                 if new_username and new_password and new_mail:
-                    if " " not in new_username and "　" not in new_username:
-                        if " " not in new_password and "　" not in new_password:
-                            if " " not in new_mail and "　" not in new_mail:
-                                valid_password, error_message = self.validate_password(new_password)
-                                if not valid_password:
-                                    error_message = me.placeholder.error(error_message, message_area_signin_code_empty, 10)
-                                    # ここで処理を終了
-                                    return
+                    if st.session_state['signin_send_button'] == "click":
+                        valid_password, error_message = self.validate_password(new_password)
+                        if not valid_password:
+                            error_message = me.placeholder.error(error_message, message_area_signin_code_empty, 10)
+                            # ここで処理を終了
+                            return
 
-                                query_0 = da.database.query("everybady", 0)
-                                # ユーザー名が既に存在するかチェック
-                                if ch_us.check_user.username_check(query_0, new_username):
-                                    me.placeholder.error("このユーザー名は既に存在します", message_area_signin_code_empty, 5)
-                                # メールアドレスが既に存在するかチェック
-                                elif ch_us.check_user.email_check(query_0, new_mail):
-                                    me.placeholder.error("このメールアドレスは既にサインインされています", message_area_signin_code_empty, 5)
-                                else:
-                                    # セキュリティコードの生成とメール送信
-                                    code = se_co.securitycode.generate_code(new_mail)
-                                    mail.mail.mail_send(new_mail, code)  # コードを含むメールを送信
-                                    me.placeholder.success(f"{new_mail} にセキュリティコードを送信しました", message_area_signin_code_empty, 3)
-                            else:
-                                me.placeholder.error("メールアドレスに半角スペースまたは全角スペースは使用できません", message_area_signin_code_empty, 5)
+                        query_0 = da.database.query("everybady", 0)
+                        # ユーザー名が既に存在するかチェック
+                        if ch_us.check_user.username_check(query_0, new_username):
+                            me.placeholder.error("このユーザー名は既に存在します", message_area_signin_code_empty, 5)
+                        # メールアドレスが既に存在するかチェック
+                        elif ch_us.check_user.email_check(query_0, new_mail):
+                            me.placeholder.error("このメールアドレスは既にサインインされています", message_area_signin_code_empty, 5)
                         else:
-                            me.placeholder.error("パスワードに半角スペースまたは全角スペースは使用できません", message_area_signin_code_empty, 5)
+                            # セキュリティコードの生成とメール送信
+                            code = se_co.securitycode.generate_code(new_mail)
+                            mail.mail.mail_send(new_mail, code)  # コードを含むメールを送信
+                            me.placeholder.success(f"{new_mail} にセキュリティコードを送信しました", message_area_signin_code_empty, 3)
                     else:
-                        me.placeholder.error("ユーザー名に半角スペースまたは全角スペースは使用できません", message_area_signin_code_empty, 5)
+                        me.placeholder.error("上記の「送信ボタン」を押してください", message_area_signin_code_empty, 5)
                 else:
                     me.placeholder.error("すべての項目を埋めてください", message_area_signin_code_empty, 5)
 

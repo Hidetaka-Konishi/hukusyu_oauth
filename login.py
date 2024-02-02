@@ -150,7 +150,6 @@ class Login:
                     except HttpError:
                         me.message.error("すべての項目を埋めてください", 5)
                     except:
-                        # me.message.error("インターネットを接続し直してから、もう一度「セキュリティコードを再送信」ボタンをクリックしてください")
                         me.message.success("過去に送信済みのセキュリティコードは無効化されました", 5)
                 else:
                     me.message.error("メールアドレスを記入して、上記の「送信」ボタンをクリックしてください", 5)
@@ -244,9 +243,10 @@ class Login:
                                     me.message.error("このメールアドレスは既にサインインされています", 5)
                                 else:
                                     st.session_state['signin_send_button'] = "click"
-                                    # セキュリティコードの生成とメール送信
+                                    # セキュリティコードの生成
                                     code = se_co.securitycode.generate_code(new_mail)
-                                    mail.mail.mail_send(new_mail, code)  # コードを含むメールを送信
+                                    # コードを含むメールを送信
+                                    mail.mail.mail_send(new_mail, code)
                                     me.message.success(f"{new_mail} にセキュリティコードを送信しました", 3)
                             else:
                                 me.message.error("メールアドレスに半角スペースまたは全角スペースは使用できません", 5)                            
@@ -302,24 +302,13 @@ class Login:
             if st.form_submit_button("セキュリティコードを再送信"):
                 if new_username and new_password and new_mail:
                     if st.session_state['signin_send_button'] == "click":
-                        valid_password, error_message = self.validate_password(new_password)
-                        if not valid_password:
-                            error_message = me.placeholder.error(error_message, message_area_signin_code_empty, 10)
-                            # ここで処理を終了
-                            return
-
-                        query_0 = da.database.query("everybady", 0)
-                        # ユーザー名が既に存在するかチェック
-                        if ch_us.check_user.username_check(query_0, new_username):
-                            me.placeholder.error("このユーザー名は既に存在します", message_area_signin_code_empty, 5)
-                        # メールアドレスが既に存在するかチェック
-                        elif ch_us.check_user.email_check(query_0, new_mail):
-                            me.placeholder.error("このメールアドレスは既にサインインされています", message_area_signin_code_empty, 5)
-                        else:
-                            # セキュリティコードの生成とメール送信
-                            code = se_co.securitycode.generate_code(new_mail)
-                            mail.mail.mail_send(new_mail, code)  # コードを含むメールを送信
-                            me.placeholder.success(f"{new_mail} にセキュリティコードを送信しました", message_area_signin_code_empty, 3)
+                        # セキュリティコードの生成
+                        code = se_co.securitycode.generate_code(new_mail)
+                        # コードを含むメールを送信
+                        mail.mail.mail_send(new_mail, code)
+                        me.placeholder.success(f"{new_mail} にセキュリティコードを送信しました", message_area_signin_code_empty, 3)
+                        time.sleep(1)
+                        me.placeholder.success("過去に送信済みのセキュリティコードは無効化されました", message_area_signin_code_empty, 3)
                     else:
                         me.placeholder.error("上記の「送信ボタン」を押してください", message_area_signin_code_empty, 5)
                 else:

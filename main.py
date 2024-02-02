@@ -165,7 +165,6 @@ class Page:
                     if not group_name in decrypted_past_group_name_list:
                         # 復習の間隔(日)を「＋」から設定しているとき
                         if not st.session_state['day_interval'] == []:
-                            print(st.session_state['day_interval'])
                             encrypt_group_name = en_de.encrypt_decrypt.encrypt_message(group_name, st.session_state["generate_key"])
                             decode_group_name = encrypt_group_name.decode('utf-8')
                             query_0[decode_group_name] = [day for day in st.session_state['day_interval']]

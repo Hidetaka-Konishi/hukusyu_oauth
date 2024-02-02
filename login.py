@@ -323,6 +323,6 @@ class Login:
                     else:
                         me.placeholder.error("上記の「送信ボタン」を押してください", message_area_signin_code_empty, 5)
                 else:
-                    me.placeholder.error("すべての項目を埋めてください", message_area_signin_code_empty, 5)
+                    me.placeholder.error("セキュリティコード以外のすべての項目を埋めてから、上記の「送信」ボタンをクリックしてください", message_area_signin_code_empty, 5)
 
 page_login = Login()

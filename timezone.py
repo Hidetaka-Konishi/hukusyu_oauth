@@ -8,7 +8,6 @@ class WorldTimezone:
     def japan_timezone(self):
         # 日本のタイムゾーンを定義
         JST = timezone(timedelta(hours=9))
-
         # 現在のUTC時間を取得し、日本のタイムゾーンに変換
         now = datetime.now(timezone.utc).astimezone(JST)
 
@@ -18,4 +17,5 @@ class WorldTimezone:
 
 world_timezone = WorldTimezone()
 
+# 他のファイルでクラス変数を使用するためにメソッドをあらかじめ実行
 world_timezone.japan_timezone()

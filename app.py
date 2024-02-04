@@ -40,12 +40,6 @@ if __name__ == "__main__":
         login.page_login.forget_security()
     elif st.session_state['page'] == 're_username_password':
         login.page_login.re_username_password()
-    elif st.session_state['page'] == 'signin_email':
-        not_page.set_ui()
-        not_page.sidebar()
-    elif st.session_state['page'] == 'email_push':
-        not_page.set_ui()
-        not_page.sidebar()
-    elif st.session_state['page'] == 'reset_and_login':
+    elif st.session_state['page'] == 'main_page':
         not_page.set_ui()
         not_page.sidebar()

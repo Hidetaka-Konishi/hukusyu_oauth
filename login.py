@@ -148,7 +148,7 @@ class Login:
         st.title("ユーザー名/パスワード再設定")
         with st.form("re_username_password"):
             new_username = st.text_input("新しいユーザー名", key="new_reset_username")
-            new_password = st.text_input("新しいパスワード（パスワードにはローマ字の大文字、小文字、数字を必ず含めるようにして14文字以上であること。この条件を満たしていてば記号もパスワードに含めて良い）", type="password", key="new_reset_password")
+            new_password = st.text_input("新しいパスワード（パスワードにはローマ字の大文字、小文字、数字を必ず一つ以上含めるようにして14文字以上であること。全角文字は使用できない。）", type="password", key="new_reset_password")
             if st.form_submit_button("決定"):
                 if new_username and new_password:
                     if " " not in new_username and "　" not in new_username:
@@ -186,8 +186,8 @@ class Login:
 
 
     def validate_password(self, password):
-        if not re.search("[^a-zA-Z0-9`˜!@#$%^&*()_+-={}[]\|:;""'<>,.?/]", password) or len(password) < 14 or not re.search("[A-Z]", password) or not re.search("[a-z]", password) or not re.search("[0-9]", password):
-            return False, "パスワードにはローマ字の大文字、小文字、数字を必ず含めるようにして14文字以上であること。この条件を満たしていてば記号もパスワードに含めて良い"
+        if re.search(r'[^\x00-\x7F]', password) or len(password) < 14 or not re.search("[A-Z]", password) or not re.search("[a-z]", password) or not re.search("[0-9]", password):
+            return False, "パスワードにはローマ字の大文字、小文字、数字を必ず一つ以上含めるようにして14文字以上であること。全角文字は使用できない。"
         return True, ""
 
 
@@ -206,7 +206,7 @@ class Login:
 
         with st.form("security_code_send"):
             new_username = st.text_input("新規ユーザー名", key="new_username")
-            new_password = st.text_input("新規パスワード（パスワードにはローマ字の大文字、小文字、数字を必ず含めるようにして14文字以上であること。この条件を満たしていてば記号もパスワードに含めて良い）", type="password", key="new_password")
+            new_password = st.text_input("新規パスワード（パスワードにはローマ字の大文字、小文字、数字を必ず一つ以上含めるようにして14文字以上であること。全角文字は使用できない。）", type="password", key="new_password")
             new_mail = st.text_input("新規メールアドレス", key="new_mail")
 
             if st.form_submit_button("送信"):

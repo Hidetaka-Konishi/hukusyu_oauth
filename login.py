@@ -271,28 +271,31 @@ class Login:
                         if not valid_code:
                             me.message.error(error_code, 5)
                             return
-                        # 入力されたセキュリティコードが適切であるか検証
-                        if se_co.securitycode.verify_code(new_mail, entered_code):
-                            # サインインした後の処理をここに記述
-                            hashed_new_username = bcrypt.hashpw(new_username.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-                            hashed_new_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-                            hashed_new_email = bcrypt.hashpw(new_mail.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+                        try:
+                            # 入力されたセキュリティコードが適切であるか検証
+                            if se_co.securitycode.verify_code(new_mail, entered_code):
+                                # サインインした後の処理をここに記述
+                                hashed_new_username = bcrypt.hashpw(new_username.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+                                hashed_new_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+                                hashed_new_email = bcrypt.hashpw(new_mail.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-                            query_0 = da.database.query("everybady", 0)
-                            query_0[hashed_new_email] = {hashed_new_username:hashed_new_password}
-                            da.database.update(query_0)
-                            st.session_state["generate_key"] = en_de.encrypt_decrypt.user_generate_key()
-                            generate_key_decode = st.session_state["generate_key"].decode('utf-8')
-                            query_1 = da.database.query("everybady", 1)
-                            query_1.append(generate_key_decode)
-                            da.database.update(query_1)
-                            # 復習する日数間隔グループの情報を入れる辞書。{"グループ1":[2,5,8]}といった形式になる。st.session_state["generate_key"]の1行目に追加。
-                            da.database.default(st.session_state["generate_key"], {})
-                            # 日付をキー、「予定」の欄で入力された文字を値として保存する辞書。{2024-1-11:[予定1,予定2]}といった形式になる。st.session_state["generate_key"]の2行目に追加。
-                            da.database.default(st.session_state["generate_key"], {})
-                            st.session_state['page'] = 'main_page'
-                            st.rerun()
-                        else:
+                                query_0 = da.database.query("everybady", 0)
+                                query_0[hashed_new_email] = {hashed_new_username:hashed_new_password}
+                                da.database.update(query_0)
+                                st.session_state["generate_key"] = en_de.encrypt_decrypt.user_generate_key()
+                                generate_key_decode = st.session_state["generate_key"].decode('utf-8')
+                                query_1 = da.database.query("everybady", 1)
+                                query_1.append(generate_key_decode)
+                                da.database.update(query_1)
+                                # 復習する日数間隔グループの情報を入れる辞書。{"グループ1":[2,5,8]}といった形式になる。st.session_state["generate_key"]の1行目に追加。
+                                da.database.default(st.session_state["generate_key"], {})
+                                # 日付をキー、「予定」の欄で入力された文字を値として保存する辞書。{2024-1-11:[予定1,予定2]}といった形式になる。st.session_state["generate_key"]の2行目に追加。
+                                da.database.default(st.session_state["generate_key"], {})
+                                st.session_state['page'] = 'main_page'
+                                st.rerun()
+                            else:
+                                me.placeholder.error("セキュリティコードが誤っている、またはコードが期限切れです", message_area_signin_code_empty, 5)
+                        except KeyError:
                             me.placeholder.error("セキュリティコードが誤っている、またはコードが期限切れです", message_area_signin_code_empty, 5)
                     else:
                         me.placeholder.error("セキュリティコードに半角スペースまたは全角スペースは使用できません", message_area_signin_code_empty, 5)

@@ -1,13 +1,13 @@
 import streamlit as st
 import message as me
 from googleapiclient.errors import HttpError
-import re
 import bcrypt
 import database as da
 import encryptdecrypt as en_de
 import checkuser as ch_us
 import securitycode as se_co
 import mail
+import inputword as in_wo
 
 # {メールアドレス:{ユーザー名:パスワード}}。everybadyの1行目に追加。
 da.database.default("everybady", {})
@@ -61,6 +61,14 @@ class Login:
                 if login_username and login_password:
                     if " " not in login_username and "　" not in login_username:
                         if " " not in login_password and "　" not in login_password:
+                            valid_username, error_username = in_wo.word_check.big_word(login_username, "ユーザー名")
+                            if not valid_username:
+                                me.message.error(error_username, 5)
+                                return
+                            valid_password, error_password = in_wo.word_check.big_word(login_password, "パスワード")
+                            if not valid_password:
+                                me.message.error(error_password, 5)
+                                return
                             query_0 = da.database.query("everybady", 0)
                             # ユーザー名とパスワードが過去に登録されてないかチェック
                             if ch_us.check_user.username_password_check(query_0, login_username, login_password):
@@ -101,6 +109,10 @@ class Login:
             if st.form_submit_button("送信＆再送信"):
                 if " " not in email_to_reset and "　" not in email_to_reset:
                     if email_to_reset:
+                        valid_email, error_email = in_wo.word_check.big_word(email_to_reset, "メールアドレス")
+                        if not valid_email:
+                            me.message.error(error_email, 5)
+                            return
                         query_0 = da.database.query("everybady", 0)
                         if ch_us.check_user.email_check(query_0, email_to_reset):
                             code = se_co.securitycode.generate_code(email_to_reset)
@@ -118,6 +130,10 @@ class Login:
             if st.form_submit_button("決定"):
                 if email_to_reset:
                     if " " not in entered_code and "　" not in entered_code:
+                        valid_code, error_code = in_wo.word_check.big_word(entered_code, "セキュリティコード")
+                        if not valid_code:
+                            me.message.error(error_code, 5)
+                            return
                         query_0 = da.database.query("everybady", 0)
                         # 入力されたメールアドレスを使用して認証
                         if ch_us.check_user.email_check(query_0, email_to_reset) and se_co.securitycode.verify_code(email_to_reset, entered_code):
@@ -136,18 +152,24 @@ class Login:
     def re_username_password(self):
         st.title("ユーザー名/パスワード再設定")
         with st.form("re_username_password"):
+            st.write("※全角文字は使用できません")
+            st.write()
+
             new_username = st.text_input("新しいユーザー名", key="new_reset_username")
-            new_password = st.text_input("新しいパスワード（パスワードにはローマ字の大文字、小文字、数字を必ず一つ以上含めるようにして14文字以上であること。全角文字は使用できない。）", type="password", key="new_reset_password")
+            new_password = st.text_input("新しいパスワード（パスワードにはローマ字の大文字、小文字、数字を必ず一つ以上含めるようにして14文字以上であること）", type="password", key="new_reset_password")
+
             if st.form_submit_button("決定"):
                 if new_username and new_password:
                     if " " not in new_username and "　" not in new_username:
                         if " " not in new_password and "　" not in new_password:
-                            valid_password, error_message = self.validate_password(new_password)
+                            valid_username, error_username = in_wo.word_check.big_word(new_username, "ユーザー名")
+                            if not valid_username:
+                                me.message.error(error_username, 5)
+                                return
+                            valid_password, error_message = in_wo.word_check.validate_password(new_password)
                             if not valid_password:
                                 me.message.error(error_message, 20)
-                                # ここで処理を終了
                                 return
-
                             query_0 = da.database.query("everybady", 0)
                             # ユーザー名が既に存在するかチェック
                             if ch_us.check_user.username_check(query_0, new_username):
@@ -174,12 +196,6 @@ class Login:
                     me.message.error("すべての項目を埋めてください", 5)
 
 
-    def validate_password(self, password):
-        if re.search(r'[^\x00-\x7F]', password) or len(password) < 14 or not re.search("[A-Z]", password) or not re.search("[a-z]", password) or not re.search("[0-9]", password):
-            return False, "パスワードにはローマ字の大文字、小文字、数字を必ず一つ以上含めるようにして14文字以上であること。全角文字は使用できない。"
-        return True, ""
-
-
     def signin(self):
         st.title("初めての方")
 
@@ -194,8 +210,10 @@ class Login:
             st.session_state['signin_send_button'] = ""
 
         with st.form("security_code_send"):
+            st.write("※全角文字は使用できません")
+            st.write()
             new_username = st.text_input("新規ユーザー名", key="new_username")
-            new_password = st.text_input("新規パスワード（パスワードにはローマ字の大文字、小文字、数字を必ず一つ以上含めるようにして14文字以上であること。全角文字は使用できない。）", type="password", key="new_password")
+            new_password = st.text_input("新規パスワード（パスワードにはローマ字の大文字、小文字、数字を必ず一つ以上含めるようにして14文字以上であること）", type="password", key="new_password")
             new_mail = st.text_input("新規メールアドレス", key="new_mail")
 
             if st.form_submit_button("送信＆再送信"):
@@ -203,12 +221,18 @@ class Login:
                     if " " not in new_username and "　" not in new_username:
                         if " " not in new_password and "　" not in new_password:
                             if " " not in new_mail and "　" not in new_mail:
-                                valid_password, error_message = self.validate_password(new_password)
-                                if not valid_password:
-                                    me.message.error(error_message, 20)
-                                    # ここで処理を終了
+                                valid_username, error_username = in_wo.word_check.big_word(new_username, "ユーザー名")
+                                if not valid_username:
+                                    me.message.error(error_username, 5)
                                     return
-
+                                valid_password, error_password = in_wo.word_check.validate_password(new_password)
+                                if not valid_password:
+                                    me.message.error(error_password, 20)
+                                    return
+                                valid_new_mail, error_new_mail = in_wo.word_check.big_word(new_mail, "メールアドレス")
+                                if not valid_new_mail:
+                                    me.message.error(error_new_mail, 5)
+                                    return
                                 query_0 = da.database.query("everybady", 0)
                                 # ユーザー名が既に存在するかチェック
                                 if ch_us.check_user.username_check(query_0, new_username):
@@ -243,6 +267,10 @@ class Login:
             if st.form_submit_button("決定"):
                 if new_username and new_password and new_mail:
                     if " " not in entered_code and "　" not in entered_code:
+                        valid_code, error_code = in_wo.word_check.big_word(entered_code, "セキュリティコード")
+                        if not valid_code:
+                            me.message.error(error_code, 5)
+                            return
                         # 入力されたセキュリティコードが適切であるか検証
                         if se_co.securitycode.verify_code(new_mail, entered_code):
                             # サインインした後の処理をここに記述

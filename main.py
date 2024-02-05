@@ -95,7 +95,7 @@ class Page:
             st.warning("まずは左側のサイドバーの「復習する日数間隔のグループ」からグループを作成してください")
 
         if st.button("予定を追加"):
-            if encrypted_schedule:
+            if schedule:
                 try:
                     for pear_add in decrypted_group_text_dict[selectbox_group_name]:
                         # 「予定を追加する日付」で選択した日付に「復習する日数間隔のグループ」で選択された復習間隔を足している
@@ -113,7 +113,7 @@ class Page:
                 except:
                     me.placeholder.error("まずは左側のサイドバーの「復習する日数間隔のグループ」からグループを作成してください", message_placeholder, 10)                  
             else:
-                me.placeholder.error("「予定」の欄を記入してください", message_placeholder, 5)
+                me.placeholder.error("「予定」を記入してください", message_placeholder, 5)
 
 
     def day_interval(self):

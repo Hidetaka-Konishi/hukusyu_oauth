@@ -292,7 +292,7 @@ class Login:
                     if " " not in entered_code and "　" not in entered_code:
                         valid_code, error_code = in_wo.word_check.big_word(entered_code, "セキュリティコード")
                         if not valid_code:
-                            me.message.error(error_code, 5)
+                            me.placeholder.error(error_code, message_area_signin_code_empty, 5)
                             return
                         try:
                             message_area_signin_code_empty.info("認証中... 🔄")

@@ -48,7 +48,7 @@ class Page:
 
                         with button_col1:
                             if st.button(f"⭕予定を更新 {day_one}"):
-                                with st.spinner('保存中...'):
+                                with st.info("保存中... 🔄"):
                                     encrypted_edited_schedule = en_de.encrypt_decrypt.encrypt_message(edited_schedule, st.session_state["generate_key"])
                                     decode_edited_schedule = encrypted_edited_schedule.decode('utf-8')
                                     # データベーステーブルに保存する前にリスト型に変換
@@ -265,7 +265,7 @@ class Page:
                 
                 with button_col1:
                     if st.button(f"⭕予定を更新 {day_one}"):
-                        with st.spinner('保存中...'):
+                        with st.info("保存中... 🔄"):
                             # データベーステーブルに保存する前にリスト型に変換
                             new_schedule_list = decode_edited_schedule.split(", ")
                             query_1 = da.database.query(st.session_state["generate_key"], 1)

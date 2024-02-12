@@ -83,19 +83,19 @@ class Login:
                                 me.message.error(error_password, 5)
                                 return
                             query_0 = da.database.query("everybady", 0)
-                            with st.spinner('認証中...'):
-                                # ユーザー名とパスワードが過去に登録されてないかチェック
-                                if ch_us.check_user.username_password_check(query_0, login_username, login_password):
-                                    # ログイン後の処理をここに記述
-                                    # ユーザー名とパスワードのペアが保存されているインデックスを変数に代入
-                                    bo, co = ch_us.check_user.username_password_check(query_0, login_username, login_password)
-                                    query_1 = da.database.query("everybady", 1)
-                                    # encryptdecrypt.pyで暗号化復号化する際にバイト列の暗号化キーを使用する必要があるのでencode('utf-8')によってバイト列に変換
-                                    st.session_state["generate_key"] = query_1[co].encode('utf-8')
-                                    st.session_state['page'] = 'main_page'
-                                    st.rerun()
-                                else:
-                                    me.message.error("ユーザー名またはパスワードが間違っています", 5)
+                            st.info("認証中... 🔄")
+                            # ユーザー名とパスワードが過去に登録されてないかチェック
+                            if ch_us.check_user.username_password_check(query_0, login_username, login_password):
+                                # ログイン後の処理をここに記述
+                                # ユーザー名とパスワードのペアが保存されているインデックスを変数に代入
+                                bo, co = ch_us.check_user.username_password_check(query_0, login_username, login_password)
+                                query_1 = da.database.query("everybady", 1)
+                                # encryptdecrypt.pyで暗号化復号化する際にバイト列の暗号化キーを使用する必要があるのでencode('utf-8')によってバイト列に変換
+                                st.session_state["generate_key"] = query_1[co].encode('utf-8')
+                                st.session_state['page'] = 'main_page'
+                                st.rerun()
+                            else:
+                                me.message.error("ユーザー名またはパスワードが間違っています", 5)
                         else:
                             me.message.error("パスワードに半角スペースまたは全角スペースは使用できません", 5)
                     else:
@@ -128,7 +128,7 @@ class Login:
                             me.message.error(error_email, 5)
                             return
                         query_0 = da.database.query("everybady", 0)
-                        with st.spinner('認証中...'):
+                        with st.info("認証中... 🔄"):
                             if ch_us.check_user.email_check(query_0, email_to_reset):
                                 code = se_co.securitycode.generate_code(email_to_reset)
                                 mail.mail.mail_send(email_to_reset, code)
@@ -150,7 +150,7 @@ class Login:
                             me.message.error(error_code, 5)
                             return
                         query_0 = da.database.query("everybady", 0)
-                        with st.spinner('認証中...'):
+                        with st.info("認証中... 🔄"):
                             # 入力されたメールアドレスを使用して認証
                             if ch_us.check_user.email_check(query_0, email_to_reset) and se_co.securitycode.verify_code(email_to_reset, entered_code):
                                 bo, co = ch_us.check_user.email_check(query_0, email_to_reset)
@@ -192,7 +192,7 @@ class Login:
                                 me.message.error(error_message, 20)
                                 return
                             query_0 = da.database.query("everybady", 0)
-                            with st.spinner('認証中...'):
+                            with st.info("認証中... 🔄"):
                                 # ユーザー名が既に存在するかチェック
                                 if ch_us.check_user.username_check(query_0, new_username):
                                     me.message.error("このユーザー名は既に存在します", 5)
@@ -238,6 +238,11 @@ class Login:
             new_password = st.text_input("新規パスワード（パスワードにはローマ字の大文字、小文字、数字を必ず一つ以上含めるようにして14文字以上であること）", type="password", key="new_password")
             new_mail = st.text_input("新規メールアドレス", key="new_mail")
 
+            # メッセージ用の表示エリア
+            message_area_signin_code = st.container()
+            # メッセージ用の表示エリアをさらに上書き可能なエリアにする
+            message_area_signin_code_empty = message_area_signin_code.empty()
+
             if st.form_submit_button("送信＆再送信"):
                 if new_username and new_password and new_mail:
                     if " " not in new_username and "　" not in new_username:
@@ -245,46 +250,41 @@ class Login:
                             if " " not in new_mail and "　" not in new_mail:
                                 valid_username, error_username = in_wo.word_check.big_word(new_username, "ユーザー名")
                                 if not valid_username:
-                                    me.message.error(error_username, 5)
+                                    me.placeholder.error(error_username, message_area_signin_code_empty, 5)
                                     return
                                 valid_password, error_password = in_wo.word_check.validate_password(new_password)
                                 if not valid_password:
-                                    me.message.error(error_password, 20)
+                                    me.placeholder.error(error_password, message_area_signin_code_empty, 20)
                                     return
                                 valid_new_mail, error_new_mail = in_wo.word_check.big_word(new_mail, "メールアドレス")
                                 if not valid_new_mail:
-                                    me.message.error(error_new_mail, 5)
+                                    me.placeholder.error(error_new_mail, message_area_signin_code_empty, 5)
                                     return
                                 query_0 = da.database.query("everybady", 0)
-                                with st.spinner('認証中...'):
-                                    # ユーザー名が既に存在するかチェック
-                                    if ch_us.check_user.username_check(query_0, new_username):
-                                        me.message.error("このユーザー名は既に存在します", 5)
-                                    # メールアドレスが既に存在するかチェック
-                                    elif ch_us.check_user.email_check(query_0, new_mail):
-                                        me.message.error("このメールアドレスは既にサインインされています", 5)
-                                    else:
-                                        # セキュリティコードの生成
-                                        code = se_co.securitycode.generate_code(new_mail)
-                                        try:
-                                            # セキュリティコードを含むメールを送信
-                                            mail.mail.mail_send(new_mail, code)
-                                            me.message.success(f"{new_mail} にセキュリティコードを送信しました", 3)
-                                        except HttpError:
-                                            me.message.error("正しいメールアドレスを入力してください", 5)             
+                                message_area_signin_code_empty.info("認証中... 🔄")
+                                # ユーザー名が既に存在するかチェック
+                                if ch_us.check_user.username_check(query_0, new_username):
+                                    me.placeholder.error("このユーザー名は既に存在します", message_area_signin_code_empty, 5)
+                                # メールアドレスが既に存在するかチェック
+                                elif ch_us.check_user.email_check(query_0, new_mail):
+                                    me.placeholder.error("このメールアドレスは既に存在します", message_area_signin_code_empty, 5)
+                                else:
+                                    # セキュリティコードの生成
+                                    code = se_co.securitycode.generate_code(new_mail)
+                                    try:
+                                        # セキュリティコードを含むメールを送信
+                                        mail.mail.mail_send(new_mail, code)
+                                        me.placeholder.success(f"{new_mail} にセキュリティコードを送信しました", message_area_signin_code_empty, 3)
+                                    except HttpError:
+                                        me.placeholder.error("正しいメールアドレスを入力してください", message_area_signin_code_empty, 5)
                             else:
-                                me.message.error("メールアドレスに半角スペースまたは全角スペースは使用できません", 5)                            
+                                me.placeholder.error("メールアドレスに半角スペースまたは全角スペースは使用できません", message_area_signin_code_empty, 5)
                         else:
-                            me.message.error("パスワードに半角スペースまたは全角スペースは使用できません", 5)
+                            me.placeholder.error("パスワードに半角スペースまたは全角スペースは使用できません", message_area_signin_code_empty, 5)
                     else:
-                        me.message.error("ユーザー名に半角スペースまたは全角スペースは使用できません", 5)
+                        me.placeholder.error("ユーザー名に半角スペースまたは全角スペースは使用できません", message_area_signin_code_empty, 5)
                 else:
-                    me.message.error("すべての項目を埋めてください", 5)
-
-            # メッセージ用の表示エリア
-            message_area_signin_code = st.container()
-            # メッセージ用の表示エリアをさらに上書き可能なエリアにする
-            message_area_signin_code_empty = message_area_signin_code.empty()            
+                    me.placeholder.error("すべての項目を埋めてください", message_area_signin_code_empty, 5)
 
             entered_code = st.text_input("セキュリティコードを入力", key="security_code")
             if st.form_submit_button("決定"):
@@ -295,36 +295,36 @@ class Login:
                             me.message.error(error_code, 5)
                             return
                         try:
-                            with st.spinner('認証中...'):
-                                # 入力されたセキュリティコードが適切であるか検証
-                                if se_co.securitycode.verify_code(new_mail, entered_code):
-                                    # サインインした後の処理をここに記述
-                                    hashed_new_username = bcrypt.hashpw(new_username.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-                                    hashed_new_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-                                    hashed_new_email = bcrypt.hashpw(new_mail.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+                            message_area_signin_code_empty.info("認証中... 🔄")
+                            # 入力されたセキュリティコードが適切であるか検証
+                            if se_co.securitycode.verify_code(new_mail, entered_code):
+                                # サインインした後の処理をここに記述
+                                hashed_new_username = bcrypt.hashpw(new_username.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+                                hashed_new_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+                                hashed_new_email = bcrypt.hashpw(new_mail.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-                                    query_0 = da.database.query("everybady", 0)
-                                    query_0[hashed_new_email] = {hashed_new_username:hashed_new_password}
-                                    da.database.update(query_0)
-                                    st.session_state["generate_key"] = en_de.encrypt_decrypt.user_generate_key()
-                                    generate_key_decode = st.session_state["generate_key"].decode('utf-8')
-                                    query_1 = da.database.query("everybady", 1)
-                                    query_1.append(generate_key_decode)
-                                    da.database.update(query_1)
-                                    # 復習する日数間隔グループの情報を入れる辞書。{"グループ1":[2,5,8]}といった形式になる。st.session_state["generate_key"]の1行目に追加。
-                                    da.database.default(st.session_state["generate_key"], {})
-                                    # 日付をキー、「予定」の欄で入力された文字を値として保存する辞書。{2024-1-11:[予定1,予定2]}といった形式になる。st.session_state["generate_key"]の2行目に追加。
-                                    da.database.default(st.session_state["generate_key"], {})
-                                    st.session_state['page'] = 'main_page'
-                                    st.rerun()
-                                else:
-                                    me.placeholder.error("セキュリティコードが誤っている、またはコードが期限切れです", message_area_signin_code_empty, 5)
+                                query_0 = da.database.query("everybady", 0)
+                                query_0[hashed_new_email] = {hashed_new_username:hashed_new_password}
+                                da.database.update(query_0)
+                                st.session_state["generate_key"] = en_de.encrypt_decrypt.user_generate_key()
+                                generate_key_decode = st.session_state["generate_key"].decode('utf-8')
+                                query_1 = da.database.query("everybady", 1)
+                                query_1.append(generate_key_decode)
+                                da.database.update(query_1)
+                                # 復習する日数間隔グループの情報を入れる辞書。{"グループ1":[2,5,8]}といった形式になる。st.session_state["generate_key"]の1行目に追加。
+                                da.database.default(st.session_state["generate_key"], {})
+                                # 日付をキー、「予定」の欄で入力された文字を値として保存する辞書。{2024-1-11:[予定1,予定2]}といった形式になる。st.session_state["generate_key"]の2行目に追加。
+                                da.database.default(st.session_state["generate_key"], {})
+                                st.session_state['page'] = 'main_page'
+                                st.rerun()
+                            else:
+                                me.placeholder.error("セキュリティコードが誤っている、またはコードが期限切れです", message_area_signin_code_empty, 5)
                         except KeyError:
                             me.placeholder.error("セキュリティコードが誤っている、またはコードが期限切れです", message_area_signin_code_empty, 5)
                     else:
                         me.placeholder.error("セキュリティコードに半角スペースまたは全角スペースは使用できません", message_area_signin_code_empty, 5)
                 else:
-                    me.placeholder.error("セキュリティコード以外のすべての項目を埋めてから、上記の「送信＆再送信」をクリックしてください", message_area_signin_code_empty, 5)
+                    me.placeholder.error("セキュリティコード以外のすべての項目を埋めてから、「送信＆再送信」をクリックしてください", message_area_signin_code_empty, 5)
 
 
     def guest_login(self):
@@ -383,7 +383,7 @@ class Login:
                     query_2 = da.database.query("everybady", 2)
                     for gu_uu in query_2:
                         guest_uuid_list.append(gu_uu)
-                    with st.spinner('認証中...'):
+                    with st.info("認証中... 🔄"):
                         # 入力されたユーザーIDが正しいかチェック
                         if ch_us.check_user.guest_uuid(query_2, user_id_input):
                             # ゲストログイン後の処理をここに記述

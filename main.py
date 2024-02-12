@@ -13,7 +13,7 @@ class Page:
         else:
             st.info("ゲストログインを次回も行う可能性がある場合は以下のユーザーIDをコピーして保存しておいてください。")
             st.write("ユーザーID👇")
-            st.code(st.session_state["uuid_generate"])
+            st.code(st.session_state["uuid_generate"], language='None')
             st.info("ユーザーIDは再設定できないので、大切なデータをこのアプリに保存する場合はホーム画面の「サインイン」からアプリにアクセスしてください。")
 
         st.title("今日やること")

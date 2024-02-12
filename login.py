@@ -83,19 +83,19 @@ class Login:
                                 me.message.error(error_password, 5)
                                 return
                             query_0 = da.database.query("everybady", 0)
-                            st.info("認証中... 🔄")
-                            # ユーザー名とパスワードが過去に登録されてないかチェック
-                            if ch_us.check_user.username_password_check(query_0, login_username, login_password):
-                                # ログイン後の処理をここに記述
-                                # ユーザー名とパスワードのペアが保存されているインデックスを変数に代入
-                                bo, co = ch_us.check_user.username_password_check(query_0, login_username, login_password)
-                                query_1 = da.database.query("everybady", 1)
-                                # encryptdecrypt.pyで暗号化復号化する際にバイト列の暗号化キーを使用する必要があるのでencode('utf-8')によってバイト列に変換
-                                st.session_state["generate_key"] = query_1[co].encode('utf-8')
-                                st.session_state['page'] = 'main_page'
-                                st.rerun()
-                            else:
-                                me.message.error("ユーザー名またはパスワードが間違っています", 5)
+                            with st.info("認証中... 🔄"):
+                                # ユーザー名とパスワードが過去に登録されてないかチェック
+                                if ch_us.check_user.username_password_check(query_0, login_username, login_password):
+                                    # ログイン後の処理をここに記述
+                                    # ユーザー名とパスワードのペアが保存されているインデックスを変数に代入
+                                    bo, co = ch_us.check_user.username_password_check(query_0, login_username, login_password)
+                                    query_1 = da.database.query("everybady", 1)
+                                    # encryptdecrypt.pyで暗号化復号化する際にバイト列の暗号化キーを使用する必要があるのでencode('utf-8')によってバイト列に変換
+                                    st.session_state["generate_key"] = query_1[co].encode('utf-8')
+                                    st.session_state['page'] = 'main_page'
+                                    st.rerun()
+                                else:
+                                    me.message.error("ユーザー名またはパスワードが間違っています", 5)
                         else:
                             me.message.error("パスワードに半角スペースまたは全角スペースは使用できません", 5)
                     else:

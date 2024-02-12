@@ -38,4 +38,14 @@ class CheckUser:
             if bcrypt.checkpw(email.encode('utf-8'), email_iter.encode('utf-8')):
                 return True, count
 
+
+    # ユーザーIDが既に登録されているかをチェック。uuidには暗号化する前のユーザーIDを記入する。
+    def guest_uuid(self, dict_name, uuid):
+        count = -1
+        for uuid_key in dict_name:
+            count += 1
+            # 過去に登録済みのユーザーIDと今回入力したユーザーIDが一致するかチェック
+            if bcrypt.checkpw(uuid.encode('utf-8'), uuid_key.encode('utf-8')):
+                return True, count
+
 check_user = CheckUser()

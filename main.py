@@ -8,6 +8,15 @@ import encryptdecrypt as en_de
 
 class Page:
     def schdule_today(self):
+        if 'uuid_generate' not in st.session_state:
+            pass
+        else:
+            st.info("ゲストログインを次回も行う可能性がある場合は以下のユーザーIDをコピーして保存しておいてください。")
+            st.write("ユーザーID👇")
+            st.code(st.session_state["uuid_generate"])
+            st.write()
+            st.info("ユーザーIDは再設定できないので、大切なデータをこのアプリに保存する場合はホーム画面の「サインイン」からアプリにアクセスしてください。")
+
         st.title("今日やること")
         query_1 = da.database.query(st.session_state["generate_key"], 1)
         if query_1:

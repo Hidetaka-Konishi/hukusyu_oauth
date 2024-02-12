@@ -43,3 +43,7 @@ if __name__ == "__main__":
     elif st.session_state['page'] == 'main_page':
         not_page.set_ui()
         not_page.sidebar()
+    elif st.session_state['page'] == 'guest':
+        login.page_login.guest_login()
+    elif st.session_state['page'] == 'again_guest_login':
+        login.page_login.again_guest_login()

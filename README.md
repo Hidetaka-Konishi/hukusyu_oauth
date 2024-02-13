@@ -3,9 +3,18 @@
 
 今日、復習するべき内容が一目でわかるようになっています。
 
-以下のURLから実際にアプリをお使いになっていただくことができます。
+以下のURLから実際にアプリをお使いになっていただくことができます。ゲストログイン機能も搭載しています。
 
 https://hukusyuwhen-eauhgtv3ecvypzktmr6tp3.streamlit.app/
+
+## ログイン機能
+![Streamlit-GoogleChrome2024-02-1311-45-22-ezgif com-speed](https://github.com/Hidetaka-Konishi/hukusyu_when/assets/142459457/41fe0f99-bc02-4e23-99a8-6a1336e7fa4f)
+
+## ユーザー名/パスワード再設定
+![Streamlit-GoogleChrome2024-02-1312-19-46-ezgif com-speed](https://github.com/Hidetaka-Konishi/hukusyu_when/assets/142459457/db8f3b50-3402-4ebf-b809-d250e0ad8c18)
+
+## 復習する内容をカレンダーに振り分ける
+![Streamlit-GoogleChrome2024-02-1312-00-35-ezgif com-speed](https://github.com/Hidetaka-Konishi/hukusyu_when/assets/142459457/e5fa1426-57dc-4c2a-a1ea-fce8bd3b1a26)
 
 ## 工夫したところ
 アプリを使うユーザーがログイン情報を忘れてしまったときの対処を工夫しました。
